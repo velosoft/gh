@@ -71,20 +71,30 @@ export async function submit(options, user) {
                 '创建 PR 失败，请检查 --submit 参数是否正确。如果要提交的 repo 属于 velosoft 账号，则应该使用 --submit velosoft'
             )
             return false
-        } else if (err.status === 422) {
-            console.log('创建 PR 失败，请检查目标 branch 是否存在')
-            return false
         }
 
         if (err.errors && err.errors.length > 0) {
             var err = err.errors[0]
-            if (err && err.message) {
-                if (err.message.indexOf('No commits between') == 0) {
-                    console.log('两个 branch 之间没有 commits 差异，无需 PR')
-                    return false
-                } else if (err.message.indexOf('A pull request already exists') == 0) {
-                    console.log('PR 已存在，无需再创建')
-                    return false
+            if (err) {
+                if (err.message) {
+                    if (err.message.indexOf('No commits between') == 0) {
+                        console.log('两个 branch 之间没有 commits 差异，无需 PR')
+                        return false
+                    } else if (err.message.indexOf('A pull request already exists') == 0) {
+                        console.log('PR 已存在，无需再创建')
+                        return false
+                    } else {
+                        console.log(err.message)
+                    }
+                } else {
+                    if (
+                        err.resource === 'PullRequest' &&
+                        err.field === 'base' &&
+                        err.code === 'invalid'
+                    ) {
+                        console.log('创建 PR 失败，请检查目标 branch 是否存在')
+                        return false
+                    }
                 }
             }
         }
