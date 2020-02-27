@@ -4,7 +4,7 @@
         "registry": "https://npm.velosoft.cn"
     },
     "description": "Boost your productivity & automate tasks when working with GitHub, all from the comfort of your CLI.",
-    "version": "2.8.5-velosoft-1",
+    "version": "2.8.5-velosoft-2",
     "homepage": "http://nodegh.io",
     "preferGlobal": true,
     "contributors": [

@@ -94,6 +94,13 @@ export async function submit(options, user) {
                     ) {
                         console.log('创建 PR 失败，请检查目标 branch 是否存在')
                         return false
+                    } else if (
+                        err.resource == 'Issue' &&
+                        err.code == 'missing_field' &&
+                        err.field == 'title'
+                    ) {
+                        console.log(`请填写 title 信息: --title 'xx xxx xxx' `)
+                        return false
                     }
                 }
             }
