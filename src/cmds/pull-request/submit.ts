@@ -64,6 +64,31 @@ export async function submit(options, user) {
 
         var { data } = await options.GitHub.pulls[method](payload)
     } catch (err) {
+        // danney add some code to cancel throw error
+        // and show some warn tips
+        if (err.status === 404) {
+            console.log(
+                '创建 PR 失败，请检查 --submit 参数是否正确。如果要提交的 repo 属于 velosoft 账号，则应该使用 --submit velosoft'
+            )
+            return false
+        } else if (err.status === 422) {
+            console.log('创建 PR 失败，请检查目标 branch 是否存在')
+            return false
+        }
+
+        if (err.errors && err.errors.length > 0) {
+            var err = err.errors[0]
+            if (err && err.message) {
+                if (err.message.indexOf('No commits between') == 0) {
+                    console.log('两个 branch 之间没有 commits 差异，无需 PR')
+                    return false
+                } else if (err.message.indexOf('A pull request already exists') == 0) {
+                    console.log('PR 已存在，无需再创建')
+                    return false
+                }
+            }
+        }
+
         var { originalError, pull } = await checkPullRequestIntegrity_(options, err)
 
         if (originalError) {
@@ -83,6 +108,11 @@ export async function submitHandler(options) {
         var pull = await submit(options, options.submit)
     } catch (err) {
         throw new Error(`Can't submit pull request\n${err}`)
+    }
+
+    // danney: 返回为 false，则表示可以容错，不需要 throw error
+    if (pull === false) {
+        return
     }
 
     if (pull.draft) {
